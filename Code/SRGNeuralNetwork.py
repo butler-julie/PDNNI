@@ -4,7 +4,10 @@
 # Version 1.0.0
 # August 13, 2019
 #
-# 
+# A child class of Restore, useful when a neural network
+# is trained on SRG matrices.  
+# Currently only compares the diagonals of the SRG matrices
+# to the true eigenvalues.
 ##################################################
 
 ##################################################
