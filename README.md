@@ -1,1 +1,1 @@
-# Universal Approximator
+# Physics Data Neural Network Interpolator (PDNNI)
