@@ -1,5 +1,24 @@
+##################################################
+# SRG Neural Network
+# Julie Hartley
+# Version 1.0.0
+# August 13, 2019
+#
+# 
+##################################################
+
+##################################################
+##################################################
+
+##############################
+# IMPORTS
+##############################
+# LOCAL IMPORTS
 from NeuralNetwork import Restore
 
+##############################
+# SRGNEURALNETWORK
+##############################
 class SRGNeuralNetwork (Restore):
     def __init__(self, weights_file, biases_file):
         super().__init__(weights_file, biases_file)
@@ -9,7 +28,6 @@ class SRGNeuralNetwork (Restore):
 
     def get_diags (self, lst):
         dim = int(sqrt(len(lst)))
-        #print ('&&&&&&&', dim)
         return np.sort(np.diag(np.reshape(lst, (dim, dim))))
 
     def compare(self, prediction_value, true_value):
@@ -21,9 +39,6 @@ class SRGNeuralNetwork (Restore):
         for i in prediction_values:
             print(i)
             predict = self.predict(i)
-            #print ('^^^^^^^^^^^^^^^')
-            #print (predict)
-            #print ('$$$$$$$$$$$$$$$$$$$$$$$$$')
             eigen_predict = self.get_diags(predict)
             diff.append(self.MSE(true_value, eigen_predict))
         return diff
