@@ -26,9 +26,6 @@ class SRGNeuralNetwork (Restore):
     def __init__(self, weights_file, biases_file):
         super().__init__(weights_file, biases_file)
 
-    def MSE (self,true, test):
-        return np.sum((true-test)**2)/len(true)
-
     def get_diags (self, lst):
         dim = int(sqrt(len(lst)))
         return np.sort(np.diag(np.reshape(lst, (dim, dim))))

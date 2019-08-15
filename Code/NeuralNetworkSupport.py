@@ -32,10 +32,10 @@ def neural_network (input_vector, input_dim, hidden_dim, output_dim, num_hidden_
     z = tf.matmul (input_vector, weights_first_hidden_layer) + biases_first_hidden_layer
     activated_function = tf.nn.relu (z)
 
-    for i in range (2, num_hidden_layers):
+    for i in range (1, num_hidden_layers):
         # Interior Hidden Layers
-        weight_name = 'weights_' + str(i)
-        bias_name = 'biases_' + str(i)
+        weight_name = 'weights_' + str(i+1)
+        bias_name = 'biases_' + str(i+1)
 
         weights_hidden_layer_1 = tf.get_variable (name=weight_name, 
             shape=[hidden_dim, hidden_dim],

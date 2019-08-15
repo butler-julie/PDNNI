@@ -90,15 +90,11 @@ class Trainer:
 
     #GET_BIASES
     def get_biases(self):
-         """"
+        """"
             Returns:
                 self.biases (a numpy array): the trained biases
             Returns the trained biases of the neural network (if it has been trained).
         """
-        if isTrianed:
-            return self.biases
-        else:
-            print ("Neural Network is not yet trained.")
         return self.biases
 
     # SAVE_BIASES
@@ -159,6 +155,8 @@ class Trainer:
                 current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
                     train_optimizer], feed_dict = { input_values:self.input_data,
                      output_values:self.training_data})
+                if i%100 == 0:
+                    print('Current Iteration: ', i)
             
             self.isTrained = True
             self.loss = current_loss
@@ -212,3 +210,21 @@ class Restore:
     # PREDICT
     def predict (self, prediction_value):
         return self.restore_NN(prediction_value)
+
+    def L2 (self,A, B):
+        return np.square(np.subtract(A, B)).mean()
+
+    def L1 (self, A, B):
+        return (np.subtract(A, B)).mean()
+
+
+    def compare_to_true (self, prediction_values, true_results):
+        L1_tot = []
+        L2_tot = []
+        for i in range (0, len(prediction_values)):
+            predict = self.predict(prediction_values[i])
+            l1 = self.L1(true_results[i], predict)
+            l2 = self.L2(true_results[i], predict)
+            L1_tot.append(l1)
+            L2_tot.append(l2)
+        return L1_tot, L2_tot
