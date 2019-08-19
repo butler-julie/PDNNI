@@ -66,6 +66,9 @@
 #
 #   compare_to_true (self, prediction_values, true_results): Compares results of the neural network 
 #   to the true results using two metrics (L1 and L2) at different input values.
+#
+#   graph_compare_to_true (self, prediction_values, true_results, filename): Produces a graph of 
+#   the L1 and L2 errors from compare_to_true.
 #################################################
 #############################
 # IMPORTS
@@ -76,6 +79,8 @@ import tensorflow as tf
 # For calculations
 import numpy as np
 from math import sqrt
+# for graphing
+import matplotlib.pyplot as plt
 # LOCAL IMPORTS 
 # The neural network for Trainer
 from NeuralNetworkSupport import neural_network as ua
@@ -445,3 +450,24 @@ class Restore:
             L1_tot.append(l1)
             L2_tot.append(l2)
         return L1_tot, L2_tot
+                  
+    def graph_compare_to_true (self, prediction_values, true_results, filename):
+        """
+            Inputs: 
+                prediction_values (a 2D list or numpy array): the values to generate outputs of the neural
+                    network.  Must be a 2D list or array even if the input is one dimension.  (ex: [[2.0]]
+                    is fine but [2.0] or 2.0 are not.
+                true_results (a list or array): the true results that correspond to each value in 
+                    prediction_values
+                filename (a str): the location to save the graph
+            Produces a graph of the L1 and L2 errors from compare_to_true.
+        """
+        # Get the L1 and L2 errors
+        l1, l2 = self.compare_to_true (prediction_values, true_results)                  
+        # Plot the L1 and L2 errors
+        plt.plot (prediction_values, l1, 'r^', label='L1 Error', linewidth=4.0)
+        plt.plot (prediction_values, l2, 'bo', label='L2 Error', linewidth=4.0)
+        # Add the legend
+        plt.legend()
+        # Save the graph
+        plt.save(filename)
