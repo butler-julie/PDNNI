@@ -1,5 +1,5 @@
 ##################################################
-# SRG Neural Network
+# SRG Restore
 # Julie Hartley
 # Version 1.0.0
 # August 13, 2019
@@ -12,7 +12,7 @@
 
 ##################################################
 # OUTLINE:
-# SRGNeuralNetwork (Restore): A child class of restore that provides 
+# SRGRestore (Restore): A child class of restore that provides 
 # additional functions for analysis of SRG matrices created with the 
 # neural network.
 # 
@@ -33,9 +33,9 @@
 from NeuralNetwork import Restore
 
 ##############################
-# SRGNEURALNETWORK
+# SRGRestore
 ##############################
-class SRGNeuralNetwork (Restore):
+class SRGRRestore (Restore):
     """
         A child class of restore that provides additional functions for analysis of
         SRG matrices created with the neural network.
