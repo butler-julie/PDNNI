@@ -2,7 +2,7 @@
 # NeuralNetworkFunctions.py
 # Julie Butler
 # February 20, 2019
-# Version 0.2
+# Version 3.0.0
 #
 # A neural network created in Tensorflow.  It can have any number of hidden layers but 
 # each hidden layer must have the same number of neurons
