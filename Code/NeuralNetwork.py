@@ -12,9 +12,60 @@
 #################################################
 # OUTLINE
 # 
-# Trainer
+# Trainer: Trains a neural network based on spefications given in the initialization.  Allows for
+# weights and biases of the trained neural network to be viewed and saved.
 #
-# Restore
+#   __init__ (self, hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
+#   input_file, training_file, isSavedLosses= False):  Initializes the neural network with 
+#   given specifications
+#
+#   get_tensor_numeric (self, name): Gets the numeric value of a specific Tensorflow tensor, 
+#   specified by name.
+#
+#   get_weights(self): Returns the trained weights of the neural network (if it has been trained).
+#
+#   save_weights(self, filename): Save the trained weights to a specified location.
+#
+#   get_biases(self): Returns the trained biases of the neural network (if it has been trained).
+#
+#   save_biases(self, filename): Save the trained biases to a specified location.
+#
+#   get_loss(self): Returns the final loss of the trained neural network.
+#
+#   get_losses(self): Returns the losses for every training iteration.
+#
+#   save_losses(self, filename): Saves the losses for every training iteration to a specified location.
+#
+#   get_dims(self):  Returns the architecture of the neural network.
+#
+#   save_dims(self, filename): Saves the architecture of the neural network (number of hidden 
+#   layers, input dimension, number of hidden neurons, and output dimension).
+#
+#   train (self,iterations): Trains the neural network with specified number of training iterations, 
+#   save the weights, biases, and final loss.
+#
+#   train_and_save (self, iterations, weights_file, biases_file): Trains the neural network and then 
+#   saves the weights and biases.
+#
+# Restore: Restores a trained neural network and uses it to make predictions and perform error analysis 
+# on the neural network's results.
+#
+#   __init__ (self,weights_file, biases_file): Retrieves the trained weights and biases from file.
+#
+#   relu (self, x): Returns f(x) = max(0, x) (the rectified linear function).
+#
+#   restore_NN (self, input_vector): Uses trained weights and biases to predict the value of 
+#   the neural network at a given input.
+#
+#   predict (self, prediction_value): Uses the restored neural network to preduct the output value 
+#   for the given input.
+#
+#   L2 (self,A, B): Finds the L2 error between two lists/arrays.
+#
+#   L1 (self,A, B): Finds the L1 error between two lists/arrays.
+#
+#   compare_to_true (self, prediction_values, true_results): Compares results of the neural network 
+#   to the true results using two metrics (L1 and L2) at different input values.
 #################################################
 #############################
 # IMPORTS
@@ -278,6 +329,10 @@ class Trainer:
 # RESTORE                  
 #############################
 class Restore:
+    """
+        Restores a trained neural network and uses it to make predictions and perform error analysis 
+        on the neural network's results.
+    """
     # __INIT__
     def __init__ (self,weights_file, biases_file):
         """
@@ -374,7 +429,9 @@ class Restore:
                 L1_tot (a list): the L1 error for each value predicted by the neural network and the true
                     result
                 L2_tot (a list): the L2 error for each value predicted by the neural network and the true
-                    result                    
+                    result   
+            Compares results of the neural network to the true results using two metrics (L1 and L2) at
+            different input values.
         """
         L1_tot = []
         L2_tot = []
