@@ -173,6 +173,31 @@ class Trainer:
         self.train(iterations)
         self.save_weights(weights_file)
         self.save_biases(biases_file)
+    # RESTORE_NN    
+    def restore_NN (self, input_vector):
+        N = len(self.biases) 
+        n = len(self.weights) - 1
+
+        #print(self.weights[0])
+
+        # First hidden layer
+        z = np.matmul(input_vector, self.weights[0]) + self.biases[0]
+        #print('*******', z)
+        #z = input_vector*self.weights[0] + self.biases[0]
+        a = self.relu(z)
+
+        for i in range (1, N):
+            z = np.matmul(a, self.weights[i]) + self.biases[i]
+            a = self.relu(z)
+            #print(len(a))
+
+        final =  np.matmul(a, self.weights[n])
+        #print(len(final))
+        return final
+        
+    # PREDICT
+    def predict (self, prediction_value):
+        return self.restore_NN(prediction_value)
 
 
 
