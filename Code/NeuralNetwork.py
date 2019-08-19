@@ -67,8 +67,17 @@
 #   compare_to_true (self, prediction_values, true_results): Compares results of the neural network 
 #   to the true results using two metrics (L1 and L2) at different input values.
 #
+#   average_l1_and_l2 (self, prediction_values, true_results): Finds the average L1 and L2 errors of 
+#   the neural network results from true results from a given set of input values.
+#
 #   graph_compare_to_true (self, prediction_values, true_results, filename): Produces a graph of 
 #   the L1 and L2 errors from compare_to_true.
+#
+#   graph_l1 (self, prediction_values, true_results, filename): Produces a graph of the L1 error 
+#   from compare_to_true.
+#
+#   graph_l2 (self, prediction_values, true_results, filename): Produces a graph of the L2 error 
+#   from compare_to_true.
 #################################################
 #############################
 # IMPORTS
@@ -450,7 +459,28 @@ class Restore:
             L1_tot.append(l1)
             L2_tot.append(l2)
         return L1_tot, L2_tot
-                  
+                 
+    # AVERAGE_L1_AND_L2              
+    def average_l1_and_l2 (self, prediction_values, true_results):
+        """
+            Inputs:
+                prediction_values (a 2D list or numpy array): the values to generate outputs of the neural
+                    network.  Must be a 2D list or array even if the input is one dimension.  (ex: [[2.0]]
+                    is fine but [2.0] or 2.0 are not.
+                true_results (a list or array): the true results that correspond to each value in 
+                    prediction_values
+            Returns:
+               l1_avg (a float): the average L1 error from all the L1 errors produced by compare_to_true
+               l2_avg (a float): the average L1 error from all the L2 errors produced by compare_to_true
+           Finds the average L1 and L2 errors of the neural network results from true results from a given set
+           of input values.
+        """
+            l1, l2 = self.compare_to_true (prediction_values, true_results)            
+            l1_avg = np.average(l1)
+            l2_avg = np.average(l2)
+            return l1_avg, l2_avg
+    
+    # GRAPH_L1_AND_L2              
     def  graph_l1_and_l2 (self, prediction_values, true_results, filename):
         """
             Inputs: 
@@ -471,3 +501,41 @@ class Restore:
         plt.legend()
         # Save the graph
         plt.save(filename)
+
+    # GRAPH_L1              
+    def  graph_l1 (self, prediction_values, true_results, filename):
+        """
+            Inputs: 
+                prediction_values (a 2D list or numpy array): the values to generate outputs of the neural
+                    network.  Must be a 2D list or array even if the input is one dimension.  (ex: [[2.0]]
+                    is fine but [2.0] or 2.0 are not.
+                true_results (a list or array): the true results that correspond to each value in 
+                    prediction_values
+                filename (a str): the location to save the graph
+            Produces a graph of the L1 error from compare_to_true.
+        """
+        # Get the L1 and L2 errors
+        l1, l2 = self.compare_to_true (prediction_values, true_results)                  
+        # Plot the L1 error
+        plt.plot (prediction_values, l1, 'r^', label='L1 Error', linewidth=4.0)
+        # Save the graph
+        plt.save(filename)
+          
+    # GRAPH_L2              
+    def  graph_l2 (self, prediction_values, true_results, filename):
+        """
+            Inputs: 
+                prediction_values (a 2D list or numpy array): the values to generate outputs of the neural
+                    network.  Must be a 2D list or array even if the input is one dimension.  (ex: [[2.0]]
+                    is fine but [2.0] or 2.0 are not.
+                true_results (a list or array): the true results that correspond to each value in 
+                    prediction_values
+                filename (a str): the location to save the graph
+            Produces a graph of the L2 error from compare_to_true.
+        """
+        # Get the L1 and L2 errors
+        l1, l2 = self.compare_to_true (prediction_values, true_results)                  
+        # Plot the L2 error
+        plt.plot (prediction_values, l2, 'bo', label='L2 Error', linewidth=4.0)
+        # Save the graph
+        plt.save(filename)                  
