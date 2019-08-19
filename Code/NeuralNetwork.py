@@ -1,7 +1,7 @@
 #################################################
 # Neural Network
 # Julie Hartley
-# Version 1.0.0
+# Version 3.0.0
 # August 8, 2019
 #
 # Basic code for a neural network that allows the
