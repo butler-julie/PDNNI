@@ -1,7 +1,7 @@
 #################################################
 # Neural Network
 # Julie Hartley
-# Version 0.0.5
+# Version 1.0.0
 # August 8, 2019
 #
 # Basic code for a neural network that allows the
@@ -29,6 +29,9 @@ from math import sqrt
 # The neural network for Trainer
 from NeuralNetworkSupport import neural_network as ua
 
+#############################
+# TRAINER
+#############################
 class Trainer:
     """
         Trains a neural network based on spefications given in the initialization.  Allows for
@@ -36,7 +39,7 @@ class Trainer:
     """
     # __INIT__
     def __init__ (self, hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
-        input_file, training_file):
+        input_file, training_file, isSavedLosses= False):
         """
             Inputs:
                 hidden_layers (an int): the number of hidden layers in the neural network
@@ -47,6 +50,8 @@ class Trainer:
                 output_dim (an int): the dimension of the training data
                 input_file (a str): the location where the input data is saved (must be .npy extension)
                 training_file (a str): the location where the training data is saved (must be .npy extension)
+                isSavedLosses (a boolean): if True will save the loss at every training iteration
+            Initializes the neural network with given specifications.
         """
         self.hidden_layers = hidden_layers
         self.hidden_neurons = hidden_neurons
@@ -55,10 +60,14 @@ class Trainer:
         self.output_dim = output_dim
         self.input_data = np.load(input_file)
         self.training_data = np.load(training_file)
+        # Initialize placeholders for the trained weights, biases, and final loss
         self.weights = []
         self.biases = []
         self.loss = 'NaN'
+        # Changed to True after training
         self.isTrained = False
+        # Holds losses for every training iteration is isSavedLosses=True
+        self.losses = []
     
     # GET_TENSOR_NUMERIC
     def get_tensor_numeric (self, name):
@@ -79,14 +88,17 @@ class Trainer:
                 self.weights (a numpy array): the trained weights
             Returns the trained weights of the neural network (if it has been trained).
         """
-        if isTrianed:
+        if isTrained:
             return self.weights
         else:
             print ("Neural Network is not yet trained.")
 
     # SAVE_WEIGHTS
     def save_weights(self, filename):
-        np.save(filename, self.weights)
+        if isTrained:
+            np.save(filename, self.weights)
+        else:
+            print ("Neural Network is not yet trained.")            
 
     #GET_BIASES
     def get_biases(self):
@@ -95,15 +107,36 @@ class Trainer:
                 self.biases (a numpy array): the trained biases
             Returns the trained biases of the neural network (if it has been trained).
         """
-        return self.biases
+        if isTrained:
+            return self.biases
+        else:
+            print ("Neural Network is not yet trained.")        
 
     # SAVE_BIASES
     def save_biases(self, filename):
-        np.save(filename, self.biases)
+        if isTrained:
+            np.save(filename, self.biases)
+        else:
+            print ("Neural Network is not yet trained.")            
 
     # GET_LOSS
     def get_loss(self):
-        return self.loss
+        if isTrained:
+            return self.loss
+        else:
+            print ("Neural Network is not yet trained.")
+            
+    def get_losses(self):
+        if isTrained and isSavedLosses:
+            return self.losses
+        else:
+            print("Neural network is not trained, or losses were not saved by input")
+                
+    def save_losses(self, filename):
+        if isTrained and isSavedLosses:
+            np.save(filename, self.losses)
+        else:
+            print("Neural network is not trained, or losses were not saved by input"        
 
     # GET_DIMS
     def get_dims(self):
@@ -155,8 +188,8 @@ class Trainer:
                 current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
                     train_optimizer], feed_dict = { input_values:self.input_data,
                      output_values:self.training_data})
-                if i%100 == 0:
-                    print('Current Iteration: ', i)
+                if isSavedLosses:   
+                    self.losses.append(current_loss)
             
             self.isTrained = True
             self.loss = current_loss
@@ -173,34 +206,12 @@ class Trainer:
         self.train(iterations)
         self.save_weights(weights_file)
         self.save_biases(biases_file)
-    # RESTORE_NN    
-    def restore_NN (self, input_vector):
-        N = len(self.biases) 
-        n = len(self.weights) - 1
-
-        #print(self.weights[0])
-
-        # First hidden layer
-        z = np.matmul(input_vector, self.weights[0]) + self.biases[0]
-        #print('*******', z)
-        #z = input_vector*self.weights[0] + self.biases[0]
-        a = self.relu(z)
-
-        for i in range (1, N):
-            z = np.matmul(a, self.weights[i]) + self.biases[i]
-            a = self.relu(z)
-            #print(len(a))
-
-        final =  np.matmul(a, self.weights[n])
-        #print(len(final))
-        return final
-        
-    # PREDICT
-    def predict (self, prediction_value):
-        return self.restore_NN(prediction_value)
 
 
 
+#############################
+# RESTORE                  
+#############################
 class Restore:
     # __INIT__
     def __init__ (self,weights_file, biases_file):
@@ -214,35 +225,28 @@ class Restore:
     def restore_NN (self, input_vector):
         N = len(self.biases) 
         n = len(self.weights) - 1
-
-        #print(self.weights[0])
-
         # First hidden layer
         z = np.matmul(input_vector, self.weights[0]) + self.biases[0]
-        #print('*******', z)
-        #z = input_vector*self.weights[0] + self.biases[0]
         a = self.relu(z)
-
         for i in range (1, N):
             z = np.matmul(a, self.weights[i]) + self.biases[i]
             a = self.relu(z)
-            #print(len(a))
-
         final =  np.matmul(a, self.weights[n])
-        #print(len(final))
         return final
         
     # PREDICT
     def predict (self, prediction_value):
         return self.restore_NN(prediction_value)
 
+    # L2
     def L2 (self,A, B):
         return np.square(np.subtract(A, B)).mean()
-
+    
+    # L1
     def L1 (self, A, B):
         return (np.subtract(A, B)).mean()
 
-
+    # COMPARE_TO_TRUE
     def compare_to_true (self, prediction_values, true_results):
         L1_tot = []
         L2_tot = []
