@@ -451,7 +451,7 @@ class Restore:
             L2_tot.append(l2)
         return L1_tot, L2_tot
                   
-    def graph_compare_to_true (self, prediction_values, true_results, filename):
+    def  graph_l1_and_l2 (self, prediction_values, true_results, filename):
         """
             Inputs: 
                 prediction_values (a 2D list or numpy array): the values to generate outputs of the neural
