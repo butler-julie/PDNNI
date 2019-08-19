@@ -20,6 +20,10 @@
 #    and biases using the initializer of Restore.
 #
 #   get_diags (self, lst): Returns the diagonals of a matrix sorted by size.
+#
+#   compare_eigenvalues(self, prediction_values, true_value): Compares the 
+#   diagonals from predicted SRG matrices to the exact eigenvalues of the starting
+#   matrix.
 ##################################################
 
 ##############################
@@ -64,23 +68,29 @@ class SRGNeuralNetwork (Restore):
         # Reshapes the list into a dim x dim matrix, gets the diagonal elements, and then sorts
         # them by size
         return np.sort(np.diag(np.reshape(lst, (dim, dim))))
-
-    # COMPARE
-    def compare(self, prediction_value, true_value):
+    
+    # COMPARE_EIGENVALUES
+    def compare_eigenvalues(self, prediction_values, true_value):
         """
             Inputs:
-                
+                prediction_values (a 2D list or array): the input values at which predictions
+                    are to be made with the neural network.  Must be 2D even if the input is 
+                    a single dim (ex: [[2.0]] is acceptable but [2.0] or 2.0 are not)
+                true_value: the true eigenvalues of the matrix
+            Returns:
+                diff (a list): a list of the MSE difference of the predicted value and the true
+                    value for each inputted prediction value.
+            Compares the diagonals from predicted SRG matrices to the exact eigenvalues of the starting
+            matrix.
         """
-        predict = self.predict(prediction_value)
-        return self.MSE(true_value, predict)
-
-    def compare_eigenvalues(self, prediction_values, true_value):
         diff = []
         for i in prediction_values:
-            print(i)
+            # Get the predicted SRG matrix at the current input
             predict = self.predict(i)
-            eigen_predict = self.get_diags(predict)
-            diff.append(self.MSE(true_value, eigen_predict))
+            # Get diagonals of predicted matrix
+            diags_predict = self.get_diags(predict)
+            # Compare diagonals to eigenvalues, add MSE to diff
+            diff.append(self.MSE(true_value, diags_predict))
         return diff
 
 
