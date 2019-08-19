@@ -95,6 +95,11 @@ class Trainer:
 
     # SAVE_WEIGHTS
     def save_weights(self, filename):
+        """
+            Inputs:
+                filename (a str): the location to save the trained weights
+            Save the trained weights to a specified location.
+        """
         if isTrained:
             np.save(filename, self.weights)
         else:
@@ -114,6 +119,11 @@ class Trainer:
 
     # SAVE_BIASES
     def save_biases(self, filename):
+        """
+            Inputs:
+                filename (a str): the location to save the trained biases
+            Save the trained biases to a specified location.
+        """        
         if isTrained:
             np.save(filename, self.biases)
         else:
@@ -121,18 +131,35 @@ class Trainer:
 
     # GET_LOSS
     def get_loss(self):
+        """
+            Returns:
+                self.loss (a float): the final loss of the trained neural network
+            Returns the final loss of the trained neural network.
+        """
         if isTrained:
             return self.loss
         else:
             print ("Neural Network is not yet trained.")
             
+    # GET_LOSSES        
     def get_losses(self):
+        """
+            Returns:
+                get_losses (a list): the loss for every training iterations
+            Returns the losses for every training iteration.
+        """
         if isTrained and isSavedLosses:
             return self.losses
         else:
             print("Neural network is not trained, or losses were not saved by input")
-                
+         
+    # SAVE_LOSSES    
     def save_losses(self, filename):
+        """
+            Input:
+                filename (a str): the location to save the losses
+            Saves the losses for every training iteration to a specified location.
+        """
         if isTrained and isSavedLosses:
             np.save(filename, self.losses)
         else:
@@ -140,30 +167,55 @@ class Trainer:
 
     # GET_DIMS
     def get_dims(self):
+         """
+            Returns:
+                self.hidden_layers (an int): the number of hidden layers in the neural network
+                Unnamed (a list): contains three elements: the dimension of the input layer, the 
+                    number of neurons for each hidden layer, and the dimension of the output layer
+            Returns the architecture of the neural network.
+         """
         return self.hidden_layers, [self.input_dim, self.hidden_neurons, self.output_dim]
+                  
+    # SAVE_DIMS
+    def save_dims(self, filename):
+        """
+            Input:
+                filename (a str): the location to save the architecture of the neural network
+            Saves the architecture of the neural network (number of hidden layers, input dimension, 
+            number of hidden neurons, and output dimension).
+        """
+        lst = [self.hidden_layers, [self.input_dim, self.hidden_neurons, self.output_dim]]
+        np.save (filename, lst)
 
     # TRAIN
     def train (self,iterations):
+        """"
+            Input:
+                iterations (an int): the number of training iterations
+            Trains the neural network with specified number of training iterations, save the weights, biases, and
+            final loss.
+        """
+        # All Tensorflow calculations must take place inside a graph
         with tf.variable_scope ('Graph'):
-            # Placeholder for the values of s at which SRG matrices will be calculated
+            # Placeholder for the values of the input
             # Given values when the Tensorflow session runs
             input_values = tf.placeholder (tf.float32, shape=[None, self.input_dim], 
                 name='input_values')
 
-            # Placeholder for the SRG matrices
+            # Placeholder for the training data
             # Given values when the Tensorflow session runs
             output_values = tf.placeholder (tf.float32, shape=[None, self.output_dim], 
                 name='output_values')
 
-            # The SRG matrices produced from the odeint solver
+            # The true values are the training data
             y_true = output_values
-            # The values of the SRG matrices approximated by the neural network
+            # Output values produced by the neural network
             y_approximate = ua (input_values, self.input_dim, self.hidden_neurons, 
                 self.output_dim, self.hidden_layers)
 
             # Function used to train the neural network
             with tf.variable_scope ('Loss'):
-                # Cost function
+                # Cost function (currently MSE)
                 loss=tf.reduce_mean (tf.square (y_approximate-y_true))
                 loss_summary_t = tf.summary.scalar ('loss', loss)
 
@@ -172,12 +224,9 @@ class Trainer:
             # Minimize the cost function using the Adam optimizer
             train_optimizer = adam.minimize (loss)
 
-        # Saves a training session
-        saver = tf.train.Saver()
         # Tensorflow Session (what acutally runs the neural network)
         with tf.Session() as sess:          
             # Training the neural network
-            print ('Training Universal Approximator:')
             # Start the Tensorflow Session
             sess.run (tf.global_variables_initializer ())
             for i in range (iterations):
@@ -188,22 +237,38 @@ class Trainer:
                 current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
                     train_optimizer], feed_dict = { input_values:self.input_data,
                      output_values:self.training_data})
+                # If all the losses are wanted, then save them
                 if isSavedLosses:   
                     self.losses.append(current_loss)
             
+            # Neural network is trained
             self.isTrained = True
+                  
             self.loss = current_loss
+                  
+            # Get the numeric values of the weights and biases of the hidden layers
             for i in range(1, self.hidden_layers+1):
                 name = "Graph/weights_" + str(i) + ":0"
                 self.weights.append(self.get_tensor_numeric(name))
                 name = "Graph/biases_" + str(i) + ":0"
                 self.biases.append(self.get_tensor_numeric(name))
 
+            # Get the numeric values of the weigts of the output layer
             self.weights.append(self.get_tensor_numeric("Graph/weights_output_layer:0"))
 
     # TRAIN_AND_SAVE
     def train_and_save (self, iterations, weights_file, biases_file):
+        """
+            Inputs:
+                iterations (an int): the number of training iterations
+                weights_file (a str): the location to save the trained weights
+                biases_file (a str): the location to save the trained biases
+            Trains the neural network and then saves the weights and biases.
+        """
+        # Train the neural network
         self.train(iterations)
+                  
+        # Save the weigths and biases
         self.save_weights(weights_file)
         self.save_biases(biases_file)
 
@@ -215,43 +280,109 @@ class Trainer:
 class Restore:
     # __INIT__
     def __init__ (self,weights_file, biases_file):
+        """
+            Inputs:
+                weights_file (a str): the location where the trained weights are saved
+                biases_file (a str): the location where the trained biases are saved
+            Retrieves the trained weights and biases from file.
+        """
         self.weights = np.load(weights_file, allow_pickle=True)
         self.biases = np.load(biases_file, allow_pickle=True)
 
+    # RELU
     def relu (self, x):
+        """
+            Inputs:
+                x (a float)
+            Returns f(x) = max(0, x) (the rectified linear function).
+        """
         return x * (x > 0)
 
     # RESTORE_NN    
     def restore_NN (self, input_vector):
+        """
+            Input:
+                input_vector (a list or numpy array): the input to the neural network
+            Returns:
+                final (a numpy array): the output of the neural network
+            Uses trained weights and biases to predict the value of the neural network
+            at a given input.
+        """
+        # The number of biases (the number of hidden layers)
         N = len(self.biases) 
+        # The index of the last entry in the weights array
         n = len(self.weights) - 1
+                  
         # First hidden layer
-        z = np.matmul(input_vector, self.weights[0]) + self.biases[0]
-        a = self.relu(z)
-        for i in range (1, N):
+        # z = np.matmul(input_vector, self.weights[0]) + self.biases[0]
+        # a = self.relu(z)
+        
+        # Finds the output of the hidden layers of the neural network
+        a = input_vector
+        for i in range (0, N):
             z = np.matmul(a, self.weights[i]) + self.biases[i]
             a = self.relu(z)
+        # The result of the output layer of the neural network
+        # No biases or activation function by design
+        # See neural_network in NeuralNetworkSupport.py
         final =  np.matmul(a, self.weights[n])
         return final
         
     # PREDICT
     def predict (self, prediction_value):
+        """
+            Input:
+                prediction_value (a list or numpy array): the input value for the neural network
+            Returns:
+                Unnamed (a numpy array): the output of the neural network from the given input value
+            Uses the restored neural network to preduct the output value for the given input.
+        """
         return self.restore_NN(prediction_value)
 
     # L2
     def L2 (self,A, B):
+        """
+            Inputs:
+                A, B (lists or numpy arrays)
+            Returns:
+                Unnamed (a float): the L2 error between A and B
+            Finds the L2 error between two lists/arrays.
+        """
         return np.square(np.subtract(A, B)).mean()
     
     # L1
     def L1 (self, A, B):
+        """
+            Inputs:
+                A, B (lists or numpy arrays)
+            Returns:
+                Unnamed (a float): the L1 error between A and B
+            Finds the L1 error between two lists/arrays.
+        """                  
         return (np.subtract(A, B)).mean()
 
     # COMPARE_TO_TRUE
     def compare_to_true (self, prediction_values, true_results):
+        """
+            Inputs:
+                prediction_values (a 2D list or numpy array): the values to generate outputs of the neural
+                    network.  Must be a 2D list or array even if the input is one dimension.  (ex: [[2.0]]
+                    is fine but [2.0] or 2.0 are not.
+                true_results (a list or array): the true results that correspond to each value in 
+                    prediction_values
+            Returns:
+                L1_tot (a list): the L1 error for each value predicted by the neural network and the true
+                    result
+                L2_tot (a list): the L2 error for each value predicted by the neural network and the true
+                    result                    
+        """
         L1_tot = []
         L2_tot = []
+        # cycle through prediction_values
         for i in range (0, len(prediction_values)):
+            # Get the value predicted by the neural network
             predict = self.predict(prediction_values[i])
+            # Get the L1 and L2 errors betwwn the predicted and true resutls
             l1 = self.L1(true_results[i], predict)
             l2 = self.L2(true_results[i], predict)
             L1_tot.append(l1)
