@@ -412,10 +412,8 @@ class Restore:
         return self.restore_NN(prediction_value)
                   
     # BATCH_PREDICT
-    def batch_predict(save_names, prediction_values, verbose=True):
+    def batch_predict(prediction_values, verbose=True):
         if verbose:
-            print ("Restoring Neural Network")
-            restore = Restore(save_names[0], save_names[1])
             for i in prediction_values:
                 predict = self.predict(i)
                 print()
@@ -423,8 +421,6 @@ class Restore:
                 print('Predicted Output: ', predict)
                 print()      
         else:
-            print ("Restoring Neural Network")
-            restore = Restore(save_names[0], save_names[1])
             predicted = []
             for i in prediction_values:    
                 predict = self.predict(i)
