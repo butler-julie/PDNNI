@@ -60,9 +60,9 @@
 #   predict (self, prediction_value): Uses the restored neural network to preduct the output value 
 #   for the given input.
 #
-#   MSE (self,A, B): Finds the MSE error between two lists/arrays.
+#   mse (self,A, B): Finds the MSE error between two lists/arrays.
 #
-#   MAE (self,A, B): Finds the MAE error between two lists/arrays.
+#   mae (self,A, B): Finds the MAE error between two lists/arrays.
 #
 #   compare_to_true (self, prediction_values, true_results): Compares results of the neural network 
 #   to the true results using two metrics (MAE and MSE) at different input values.
@@ -70,7 +70,7 @@
 #   average_mae_and_mse (self, prediction_values, true_results): Finds the average MAE and MSE errors of 
 #   the neural network results from true results from a given set of input values.
 #
-#   graph_compare_to_true (self, prediction_values, true_results, filename): Produces a graph of 
+#   graph_mae_and_mse (self, prediction_values, true_results, filename): Produces a graph of 
 #   the MAE and MSE errors from compare_to_true.
 #
 #   graph_mae (self, prediction_values, true_results, filename): Produces a graph of the MAE error 
