@@ -24,6 +24,10 @@
 #   compare_eigenvalues(self, prediction_values, true_value): Compares the 
 #   diagonals from predicted SRG matrices to the exact eigenvalues of the starting
 #   matrix.
+#
+#   graph_compare_eigenvalues(self, prediction_values, true_value):Plots the MSE error
+#   between the diagonals of the predicted SRG matrices and the true eigenvalues
+#   of the starting matrix.
 ##################################################
 
 ##############################
@@ -90,8 +94,26 @@ class SRGRRestore (Restore):
             # Get diagonals of predicted matrix
             diags_predict = self.get_diags(predict)
             # Compare diagonals to eigenvalues, add MSE to diff
-            diff.append(self.MSE(true_value, diags_predict))
+            diff.append(self.L2(true_value, diags_predict))
         return diff
+    
+    def graph_compare_eigenvalues(self, prediction_values, true_value, filename):
+        """
+            Inputs:
+                prediction_values (a 2D list or array): the input values at which predictions
+                    are to be made with the neural network.  Must be 2D even if the input is 
+                    a single dim (ex: [[2.0]] is acceptable but [2.0] or 2.0 are not)
+                true_value (a list or numpy array): the true eigenvalues of the matrix
+                filename (a str): the location to save the plot
+            Plots the MSE error between the diagonals of the predicted SRG matrices and the true eigenvalues
+            of the starting matrix.
+        """
+        # Get the MSE error
+        diff = self.compare_eigenvalues (prediction_values, true_value)
+        # Plot the MSE error
+        plt.plot(prediction_values, diff, label='MSE Error', 'go', linewidth=4.0)
+        # Save the plot
+        plt.save(filename)
 
 
 
