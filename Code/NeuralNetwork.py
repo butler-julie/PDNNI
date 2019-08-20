@@ -16,8 +16,7 @@
 # weights and biases of the trained neural network to be viewed and saved.
 #
 #   __init__ (self, hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
-#   input_file, training_file, isSavedLosses= False):  Initializes the neural network with 
-#   given specifications
+#   input_file, training_file):  Initializes the neural network with given specifications
 #
 #   get_tensor_numeric (self, name): Gets the numeric value of a specific Tensorflow tensor, 
 #   specified by name.
@@ -103,8 +102,8 @@ class Train:
         weights and biases of the trained neural network to be viewed and saved.
     """
     # __INIT__
-    def __init__ (self, hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
-        input_file, training_file, isSavedLosses= False):
+    def __init__ (self, hidden_layers, hidden_neurons, input_dim, output_dim,
+        input_file, training_file):
         """
             Inputs:
                 hidden_layers (an int): the number of hidden layers in the neural network
@@ -115,12 +114,10 @@ class Train:
                 output_dim (an int): the dimension of the training data
                 input_file (a str): the location where the input data is saved (must be .npy extension)
                 training_file (a str): the location where the training data is saved (must be .npy extension)
-                isSavedLosses (a boolean): if True will save the loss at every training iteration
             Initializes the neural network with given specifications.
         """
         self.hidden_layers = hidden_layers
         self.hidden_neurons = hidden_neurons
-        self.learning_rate = learning_rate
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.input_data = np.load(input_file)
@@ -213,7 +210,7 @@ class Train:
                 get_losses (a list): the loss for every training iterations
             Returns the losses for every training iteration.
         """
-        if isTrained and isSavedLosses:
+        if isTrained:
             return self.losses
         else:
             print("Neural network is not trained, or losses were not saved by input")
@@ -225,11 +222,18 @@ class Train:
                 filename (a str): the location to save the losses
             Saves the losses for every training iteration to a specified location.
         """
-        if isTrained and isSavedLosses:
+        if isTrained:
             np.save(filename, self.losses)
         else:
-            print("Neural network is not trained, or losses were not saved by input"        
-
+            print("Neural network is not trained, or losses were not saved by input"
+          
+    # GRAPH_LOSSES                  
+    def graph_losses (self, filename):
+        N = len(self.losses)
+        x = np.arange(0, N, 1)
+        plt.plot (x, self.losses, 'go', linewidth=4.0)
+        plt.save(filename)
+                  
     # GET_DIMS
     def get_dims(self):
          """
@@ -253,7 +257,7 @@ class Train:
         np.save (filename, lst)
 
     # TRAIN
-    def train (self,iterations):
+    def train (self,iterations, learning_rate):
         """"
             Input:
                 iterations (an int): the number of training iterations
@@ -285,7 +289,7 @@ class Train:
                 loss_summary_t = tf.summary.scalar ('loss', loss)
 
             # Optimizer, uses an Adam optimizer
-            adam = tf.train.AdamOptimizer (learning_rate = self.learning_rate)
+            adam = tf.train.AdamOptimizer (learning_rate = learning_rate)
             # Minimize the cost function using the Adam optimizer
             train_optimizer = adam.minimize (loss)
 
@@ -302,9 +306,8 @@ class Train:
                 current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
                     train_optimizer], feed_dict = { input_values:self.input_data,
                      output_values:self.training_data})
-                # If all the losses are wanted, then save them
-                if isSavedLosses:   
-                    self.losses.append(current_loss)
+                # Save current loss
+                self.losses.append(current_loss)
             
             # Neural network is trained
             self.isTrained = True
@@ -322,7 +325,7 @@ class Train:
             self.weights.append(self.get_tensor_numeric("Graph/weights_output_layer:0"))
 
     # TRAIN_AND_SAVE
-    def train_and_save (self, iterations, weights_file, biases_file):
+    def train_and_save (self, iterations, learning_rate, weights_file, biases_file):
         """
             Inputs:
                 iterations (an int): the number of training iterations
@@ -331,7 +334,7 @@ class Train:
             Trains the neural network and then saves the weights and biases.
         """
         # Train the neural network
-        self.train(iterations)
+        self.train(iterations, learning_rate)
                   
         # Save the weigths and biases
         self.save_weights(weights_file)
@@ -409,15 +412,23 @@ class Restore:
         return self.restore_NN(prediction_value)
                   
     # BATCH_PREDICT
-    def batch_predict(save_names, prediction_values):
-        print ("Restoring Neural Network")
-        restore = Restore(save_names[0], save_names[1])
-        for i in prediction_values:
-            predict = restore.predict(i)
-            print()
-            print('Input: ', i)
-            print('Predicted Output: ', predict)
-            print()                   
+    def batch_predict(save_names, prediction_values, verbose=True):
+        if verbose:
+            print ("Restoring Neural Network")
+            restore = Restore(save_names[0], save_names[1])
+            for i in prediction_values:
+                predict = self.predict(i)
+                print()
+                print('Input: ', i)
+                print('Predicted Output: ', predict)
+                print()      
+        else:
+            print ("Restoring Neural Network")
+            restore = Restore(save_names[0], save_names[1])
+            predicted = []
+            for i in prediction_values:    
+                predict = self.predict(i)
+                predicted.append(predict)
 
     # MSE
     def mse (self,A, B):
@@ -577,15 +588,15 @@ class Restore:
                   
 class TrainAndRestore (Train, Restore):
 # __INIT__
-    def __init__ (self, hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
-        input_file, training_file, isSavedLosses= False):
-        Train.__init__(hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
-        input_file, training_file, isSavedLosses= False)
+    def __init__ (self, hidden_layers, hidden_neurons, input_dim, output_dim,
+        input_file, training_file):
+        Train.__init__(hidden_layers, hidden_neurons, input_dim, output_dim,
+        input_file, training_file)
                   
     # TRAIN_AND_BATCH_PREDICT
-    def train_and_batch_predict(nn_specs, save_names, prediction_values):
+    def train_and_batch_predict(iterations, learning_rate, save_names, prediction_values):
         print ("Training and Saving Weights and Biases")
-        self.train_and_save(nn_specs[7], save_names[0], save_names[1])
+        self.train_and_save(iterations, learning_rate, save_names[0], save_names[1])
 
         print('\nLoss: ', train.get_loss(), '\n')
 
@@ -595,12 +606,9 @@ class TrainAndRestore (Train, Restore):
         self.batch_predict(prediction_values)
                   
     # TRAIN_AND_ERROR_ANALYSIS
-    def train_and_error_analysis (nn_specs, save_names, prediction_values, true_values, save_prefix):
-        print("Initializing Neural Network")
-        train = Trainer(nn_specs[0], nn_secs[1], nn_specs[2], nn_specs[3], nn_specs[4], nn_specs[5], nn_specs[6])
-
+    def train_and_error_analysis (iterations, learning_rate save_names, prediction_values, true_values, save_prefix):
         print ("Training and Saving Weights and Biases")
-        strain.train_and_save(nn_specs[7], save_names[0], save_names[1])
+        strain.train_and_save(iterations, learning_rate, save_names[0], save_names[1])
 
         print('\nLoss: ', train.get_loss(), '\n')
 
