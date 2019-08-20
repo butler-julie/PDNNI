@@ -61,7 +61,7 @@ def predict(save_names, prediction_values):
         print()    
     
 # TRAIN_AND_ERROR_ANALYSIS
-def train_and_error_analysis (nn_specs, save_names, prediction_values, save_prefix):
+def train_and_error_analysis (nn_specs, save_names, prediction_values, true_values, save_prefix):
     print("Initializing Neural Network")
     train = Trainer(nn_specs[0], nn_secs[1], nn_specs[2], nn_specs[3], nn_specs[4], nn_specs[5], nn_specs[6])
     
@@ -73,9 +73,49 @@ def train_and_error_analysis (nn_specs, save_names, prediction_values, save_pref
     print ("Restoring Neural Network")
     restore = Restore(save_names[0], save_names[1])
     
+    mae, mse = restore.average_mae_and_mse (prediction_values, true_values)
+    print ()
+    print ("Average Mean Absolute Error: ", mae)
+    print ("Average Mean Squared Error: ", mse)
+    print()
+    
+    mae_and_mse_filename = save_prefix + 'mae_and_mse.png'
+    mae_filename = save_prefix + 'mae.png'
+    mse_filename = save_prefix + 'mse.png'
+    
+    print ("Making and Saving Graph of MAE and MSE")
+    restore.graph_mae_and_mse (prediction_values, true_values, mae_and_mse_filename)
+    
+    print("Making and Saving Graph of MAE")
+    restore.graph_mae (prediction_values, true_values, mae_filename)
+    
+    print("Making and Saving Graph of MSE")
+    restore.graph_mse (prediction_values, true_values, mse_filename)
+    
     
 # ERROR_ANALYSIS
 def error_analysis (save_names, prediction_values, save_prefix):
+    print ("Restoring Neural Network")
+    restore = Restore(save_names[0], save_names[1])
+    
+    mae, mse = restore.average_mae_and_mse (prediction_values, true_values)
+    print ()
+    print ("Average Mean Absolute Error: ", mae)
+    print ("Average Mean Squared Error: ", mse)
+    print()
+    
+    mae_and_mse_filename = save_prefix + 'mae_and_mse.png'
+    mae_filename = save_prefix + 'mae.png'
+    mse_filename = save_prefix + 'mse.png'
+    
+    print ("Making and Saving Graph of MAE and MSE")
+    restore.graph_mae_and_mse (prediction_values, true_values, mae_and_mse_filename)
+    
+    print("Making and Saving Graph of MAE")
+    restore.graph_mae (prediction_values, true_values, mae_filename)
+    
+    print("Making and Saving Graph of MSE")
+    restore.graph_mse (prediction_values, true_values, mse_filename)    
 
 def train_and_predict_eigen_srg(nn_specs, save_names, prediction_values):
     """
