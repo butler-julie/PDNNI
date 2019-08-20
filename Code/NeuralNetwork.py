@@ -559,9 +559,7 @@ class Restore:
         plt.save(filename)  
                   
     # ERROR_ANALYSIS
-    def error_analysis (save_names, prediction_values, save_prefix):
-        print ("Restoring Neural Network")
-        restore = Restore(save_names[0], save_names[1])
+    def error_analysis (prediction_values, true_results, save_prefix):
 
         mae, mse = restore.average_mae_and_mse (prediction_values, true_values)
         print ()
