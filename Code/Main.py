@@ -27,6 +27,56 @@
 from NeuralNetork import Trainer
 from SRGNeuralNetwork import SRGNeuralNetwork
 
+# TRAIN_AND_PREDICT
+def train_and_predict(nn_specs, save_names, prediction_values):
+    print("Initializing Neural Network")
+    train = Trainer(nn_specs[0], nn_secs[1], nn_specs[2], nn_specs[3], nn_specs[4], nn_specs[5], nn_specs[6])
+    
+    print ("Training and Saving Weights and Biases")
+    strain.train_and_save(nn_specs[7], save_names[0], save_names[1])
+    
+    print('\nLoss: ', train.get_loss(), '\n')
+    
+    
+    print ("Restoring Neural Network")
+    restore = Restore(save_names[0], save_names[1])
+    for i in prediction_values:
+        predict = restore.predict(i)
+        print()
+        print('Input: ', i)
+        print('Predicted Output: ', predict)
+        print()
+         
+    
+    
+# PREDICT
+def predict(save_names, prediction_values):
+    print ("Restoring Neural Network")
+    restore = Restore(save_names[0], save_names[1])
+    for i in prediction_values:
+        predict = restore.predict(i)
+        print()
+        print('Input: ', i)
+        print('Predicted Output: ', predict)
+        print()    
+    
+# TRAIN_AND_ERROR_ANALYSIS
+def train_and_error_analysis (nn_specs, save_names, prediction_values, save_prefix):
+    print("Initializing Neural Network")
+    train = Trainer(nn_specs[0], nn_secs[1], nn_specs[2], nn_specs[3], nn_specs[4], nn_specs[5], nn_specs[6])
+    
+    print ("Training and Saving Weights and Biases")
+    strain.train_and_save(nn_specs[7], save_names[0], save_names[1])
+    
+    print('\nLoss: ', train.get_loss(), '\n')
+    
+    print ("Restoring Neural Network")
+    restore = Restore(save_names[0], save_names[1])
+    
+    
+# ERROR_ANALYSIS
+def error_analysis (save_names, prediction_values, save_prefix):
+
 def train_and_predict_eigen_srg(nn_specs, save_names, prediction_values):
     """
         Inputs:
@@ -49,7 +99,7 @@ def train_and_predict_eigen_srg(nn_specs, save_names, prediction_values):
     srg_train = Trainer(nn_specs[0], nn_secs[1], nn_specs[2], nn_specs[3], nn_specs[4], nn_specs[5], nn_specs[6])
     
     print ("Training and Saving Weights and Biases")
-    srg_train.run(nn_specs[7], save_names[0], save_names[1])
+    srg_train.train_and_save(nn_specs[7], save_names[0], save_names[1])
     
     print('\nLoss: ', srg_train.get_loss(), '\n')
     
