@@ -1,3 +1,28 @@
+#############################
+#                           #
+# IMPORTS                   #
+#                           #
+#############################
+# THIRD-PARTY IMPORTS
+# For calculations
+import numpy as np
+# For graphing
+#import matplotlib.pyplot as plt
+#from pylab import *
+# For SRG and matrix manipulation
+from numpy import array, dot, diag, reshape
+from scipy.linalg import eigvalsh
+from scipy.integrate import odeint, ode
+# Creating random numbers (for file naming)
+import random
+import time
+
+
+
+# SYSTEM IMPORTS
+import time, os
+dir = os.path.dirname (os.path.realpath (__file__))
+
 # COMMUTATOR
 def commutator(a,b):
     """
@@ -64,18 +89,15 @@ def ode1_1 (initial_y, s_end, ds): # NOTE: arguments have to be switched in flow
     return ys 
 
     
-def srg (initial_hamiltonian, ds, sfinal):
+def srg (initial_hamiltonian, ds, sfinal, file_out):
     """
     """
     # Pairing model set-up code taken from srg_pairing.py by H. Hergert
-    print ("Creating Hamiltonian")
+    print ("Importing Hamiltonian")
     # The intial Hamiltonian
-    H0    = Hamiltonian(0.5, 1)
+    H0    = np.load(initial_hamiltonian)
     #print (H0)
     dim   = H0.shape[0]
-
-    # calculate exact eigenvalues
-    eigenvalues = eigvalsh(H0)
 
     # turn initial Hamiltonian into a linear array
     y0  = reshape(H0, -1)                 
@@ -84,7 +106,7 @@ def srg (initial_hamiltonian, ds, sfinal):
 
     print ("SRG Flow")
     start= time.time()
-    Hs = ode1_1 (y0, 10, 1.0)
+    Hs = ode1_1 (y0, sfinal, ds)
     print ('\nTime', time.time()-start, '\n' )
 
-    np.save('SRG_HO_DIM_10_DS_1.0', Hs)
+    np.save(file_out, Hs)
