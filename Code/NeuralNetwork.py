@@ -97,7 +97,7 @@ from NeuralNetworkSupport import neural_network as ua
 #############################
 # TRAINER
 #############################
-class Trainer:
+class Train:
     """
         Trains a neural network based on spefications given in the initialization.  Allows for
         weights and biases of the trained neural network to be viewed and saved.
@@ -407,6 +407,17 @@ class Restore:
             Uses the restored neural network to preduct the output value for the given input.
         """
         return self.restore_NN(prediction_value)
+                  
+    # BATCH_PREDICT
+    def batch_predict(save_names, prediction_values):
+        print ("Restoring Neural Network")
+        restore = Restore(save_names[0], save_names[1])
+        for i in prediction_values:
+            predict = restore.predict(i)
+            print()
+            print('Input: ', i)
+            print('Predicted Output: ', predict)
+            print()                   
 
     # MSE
     def mse (self,A, B):
@@ -538,4 +549,84 @@ class Restore:
         # Plot the MSE error
         plt.plot (prediction_values, mse, 'bo', label='MSE Error', linewidth=4.0)
         # Save the graph
-        plt.save(filename)                  
+        plt.save(filename)  
+                  
+    # ERROR_ANALYSIS
+    def error_analysis (save_names, prediction_values, save_prefix):
+        print ("Restoring Neural Network")
+        restore = Restore(save_names[0], save_names[1])
+
+        mae, mse = restore.average_mae_and_mse (prediction_values, true_values)
+        print ()
+        print ("Average Mean Absolute Error: ", mae)
+        print ("Average Mean Squared Error: ", mse)
+        print()
+
+        mae_and_mse_filename = save_prefix + 'mae_and_mse.png'
+        mae_filename = save_prefix + 'mae.png'
+        mse_filename = save_prefix + 'mse.png'
+
+        print ("Making and Saving Graph of MAE and MSE")
+        restore.graph_mae_and_mse (prediction_values, true_values, mae_and_mse_filename)
+
+        print("Making and Saving Graph of MAE")
+        restore.graph_mae (prediction_values, true_values, mae_filename)
+
+        print("Making and Saving Graph of MSE")
+        restore.graph_mse (prediction_values, true_values, mse_filename)                      
+                  
+class TrainAndRestore (Train, Restore):
+# __INIT__
+    def __init__ (self, hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
+        input_file, training_file, isSavedLosses= False):
+        Train.__init__(hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
+        input_file, training_file, isSavedLosses= False)
+                  
+    # TRAIN_AND_BATCH_PREDICT
+    def train_and_batch_predict(nn_specs, save_names, prediction_values):
+        print ("Training and Saving Weights and Biases")
+        self.train_and_save(nn_specs[7], save_names[0], save_names[1])
+
+        print('\nLoss: ', train.get_loss(), '\n')
+
+
+        print ("Restoring Neural Network")
+        restore = Restore(save_names[0], save_names[1])
+        self.batch_predict(prediction_values)
+                  
+    # TRAIN_AND_ERROR_ANALYSIS
+    def train_and_error_analysis (nn_specs, save_names, prediction_values, true_values, save_prefix):
+        print("Initializing Neural Network")
+        train = Trainer(nn_specs[0], nn_secs[1], nn_specs[2], nn_specs[3], nn_specs[4], nn_specs[5], nn_specs[6])
+
+        print ("Training and Saving Weights and Biases")
+        strain.train_and_save(nn_specs[7], save_names[0], save_names[1])
+
+        print('\nLoss: ', train.get_loss(), '\n')
+
+        print ("Restoring Neural Network")
+        restore = Restore(save_names[0], save_names[1])
+
+        mae, mse = restore.average_mae_and_mse (prediction_values, true_values)
+        print ()
+        print ("Average Mean Absolute Error: ", mae)
+        print ("Average Mean Squared Error: ", mse)
+        print()
+
+        mae_and_mse_filename = save_prefix + 'mae_and_mse.png'
+        mae_filename = save_prefix + 'mae.png'
+        mse_filename = save_prefix + 'mse.png'
+
+        print ("Making and Saving Graph of MAE and MSE")
+        restore.graph_mae_and_mse (prediction_values, true_values, mae_and_mse_filename)
+
+        print("Making and Saving Graph of MAE")
+        restore.graph_mae (prediction_values, true_values, mae_filename)
+
+        print("Making and Saving Graph of MSE")
+        restore.graph_mse (prediction_values, true_values, mse_filename)
+
+
+                  
+                
+                  
