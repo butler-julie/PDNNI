@@ -6,3 +6,11 @@
 #
 # An interactive way to use PDNNI
 ##################################################
+
+import tkinter as tk
+from NeuralNetwork import Trainer, Restore
+
+def command_line():
+  
+  
+def gui ():  
