@@ -60,23 +60,23 @@
 #   predict (self, prediction_value): Uses the restored neural network to preduct the output value 
 #   for the given input.
 #
-#   L2 (self,A, B): Finds the L2 error between two lists/arrays.
+#   MSE (self,A, B): Finds the MSE error between two lists/arrays.
 #
-#   L1 (self,A, B): Finds the L1 error between two lists/arrays.
+#   MAE (self,A, B): Finds the MAE error between two lists/arrays.
 #
 #   compare_to_true (self, prediction_values, true_results): Compares results of the neural network 
-#   to the true results using two metrics (L1 and L2) at different input values.
+#   to the true results using two metrics (MAE and MSE) at different input values.
 #
-#   average_l1_and_l2 (self, prediction_values, true_results): Finds the average L1 and L2 errors of 
+#   average_mae_and_mse (self, prediction_values, true_results): Finds the average MAE and MSE errors of 
 #   the neural network results from true results from a given set of input values.
 #
 #   graph_compare_to_true (self, prediction_values, true_results, filename): Produces a graph of 
-#   the L1 and L2 errors from compare_to_true.
+#   the MAE and MSE errors from compare_to_true.
 #
-#   graph_l1 (self, prediction_values, true_results, filename): Produces a graph of the L1 error 
+#   graph_mae (self, prediction_values, true_results, filename): Produces a graph of the MAE error 
 #   from compare_to_true.
 #
-#   graph_l2 (self, prediction_values, true_results, filename): Produces a graph of the L2 error 
+#   graph_mse (self, prediction_values, true_results, filename): Produces a graph of the MSE error 
 #   from compare_to_true.
 #################################################
 #############################
@@ -414,7 +414,7 @@ class Restore:
             Inputs:
                 A, B (lists or numpy arrays)
             Returns:
-                Unnamed (a float): the L2 error between A and B
+                Unnamed (a float): the MSE error between A and B
             Finds the mean squared error between two lists/arrays.
         """
         return np.square(np.subtract(A, B)).mean()
@@ -425,7 +425,7 @@ class Restore:
             Inputs:
                 A, B (lists or numpy arrays)
             Returns:
-                Unnamed (a float): the L1 error between A and B
+                Unnamed (a float): the MAE error between A and B
             Finds the mean absolute error between two lists/arrays.
         """                  
         return np.absolute(np.subtract(A, B)).mean()
@@ -440,11 +440,11 @@ class Restore:
                 true_results (a list or array): the true results that correspond to each value in 
                     prediction_values
             Returns:
-                mae_tot (a list): the L1 error for each value predicted by the neural network and the true
+                mae_tot (a list): the MAE error for each value predicted by the neural network and the true
                     result
-                mse_tot (a list): the L2 error for each value predicted by the neural network and the true
+                mse_tot (a list): the MSE error for each value predicted by the neural network and the true
                     result   
-            Compares results of the neural network to the true results using two metrics (L1 and L2) at
+            Compares results of the neural network to the true results using two metrics (MAE and MSE) at
             different input values.
         """
         mae_tot = []
@@ -453,14 +453,14 @@ class Restore:
         for i in range (0, len(prediction_values)):
             # Get the value predicted by the neural network
             predict = self.predict(prediction_values[i])
-            # Get the L1 and L2 errors betwwn the predicted and true resutls
+            # Get the MAE and MSE errors betwwn the predicted and true resutls
             mae = self.mae(true_results[i], predict)
             mse = self.mse(true_results[i], predict)
-            mae_tot.append(l1)
-            mse_tot.append(l2)
+            mae_tot.append(mae)
+            mse_tot.append(mse)
         return mae_tot, mse_tot
                  
-    # AVERAGE_L1_AND_L2              
+    # AVERAGE_MAE_AND_MSE              
     def average_mae_and_mse (self, prediction_values, true_results):
         """
             Inputs:
@@ -470,17 +470,17 @@ class Restore:
                 true_results (a list or array): the true results that correspond to each value in 
                     prediction_values
             Returns:
-               l1_avg (a float): the average L1 error from all the L1 errors produced by compare_to_true
-               l2_avg (a float): the average L1 error from all the L2 errors produced by compare_to_true
+               mae_avg (a float): the average MAE error from all the MAE errors produced by compare_to_true
+               mse_avg (a float): the average MAE error from all the MSE errors produced by compare_to_true
            Finds the average MAE and MSE of the neural network results from true results from a given set
            of input values.
         """
             mae, mse = self.compare_to_true (prediction_values, true_results)            
-            mae_avg = np.average(l1)
-            mse_avg = np.average(l2)
+            mae_avg = np.average(mae)
+            mse_avg = np.average(mse)
             return mae_avg, mse_avg
     
-    # GRAPH_L1_AND_L2              
+    # GRAPH_MAE_AND_MSE              
     def  graph_mae_and_mse (self, prediction_values, true_results, filename):
         """
             Inputs: 
@@ -492,9 +492,9 @@ class Restore:
                 filename (a str): the location to save the graph
             Produces a graph of the MAE and MSE from compare_to_true.
         """
-        # Get the L1 and L2 errors
+        # Get the MAE and MSE errors
         mae, mse = self.compare_to_true (prediction_values, true_results)                  
-        # Plot the L1 and L2 errors
+        # Plot the MAE and MSE errors
         plt.plot (prediction_values, mae, 'r^', label='MAE', linewidth=4.0)
         plt.plot (prediction_values, mse, 'bo', label='MSE', linewidth=4.0)
         # Add the legend
@@ -502,7 +502,7 @@ class Restore:
         # Save the graph
         plt.save(filename)
 
-    # GRAPH_L1              
+    # GRAPH_MAE              
     def  graph_mae (self, prediction_values, true_results, filename):
         """
             Inputs: 
@@ -512,16 +512,16 @@ class Restore:
                 true_results (a list or array): the true results that correspond to each value in 
                     prediction_values
                 filename (a str): the location to save the graph
-            Produces a graph of the L1 error from compare_to_true.
+            Produces a graph of the MAE error from compare_to_true.
         """
-        # Get the L1 and L2 errors
+        # Get the MAE and MSE errors
         mae, mse = self.compare_to_true (prediction_values, true_results)                  
-        # Plot the L1 error
-        plt.plot (prediction_values, l1, 'r^', label='L1 Error', linewidth=4.0)
+        # Plot the MAE error
+        plt.plot (prediction_values, mae, 'r^', label='MAE Error', linewidth=4.0)
         # Save the graph
         plt.save(filename)
           
-    # GRAPH_L2              
+    # GRAPH_MSE              
     def  graph_mse (self, prediction_values, true_results, filename):
         """
             Inputs: 
@@ -531,11 +531,11 @@ class Restore:
                 true_results (a list or array): the true results that correspond to each value in 
                     prediction_values
                 filename (a str): the location to save the graph
-            Produces a graph of the L2 error from compare_to_true.
+            Produces a graph of the MSE error from compare_to_true.
         """
-        # Get the L1 and L2 errors
-        l1, l2 = self.compare_to_true (prediction_values, true_results)                  
-        # Plot the L2 error
-        plt.plot (prediction_values, l2, 'bo', label='L2 Error', linewidth=4.0)
+        # Get the MAE and MSE errors
+        mae, mse = self.compare_to_true (prediction_values, true_results)                  
+        # Plot the MSE error
+        plt.plot (prediction_values, mse, 'bo', label='MSE Error', linewidth=4.0)
         # Save the graph
         plt.save(filename)                  
