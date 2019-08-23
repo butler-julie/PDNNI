@@ -150,7 +150,7 @@ class Train:
                 self.weights (a numpy array): the trained weights
             Returns the trained weights of the neural network (if it has been trained).
         """
-        if isTrained:
+        if self.isTrained:
             return self.weights
         else:
             print ("Neural Network is not yet trained.")
@@ -162,7 +162,7 @@ class Train:
                 filename (a str): the location to save the trained weights
             Save the trained weights to a specified location.
         """
-        if isTrained:
+        if self.isTrained:
             np.save(filename, self.weights)
         else:
             print ("Neural Network is not yet trained.")            
@@ -174,7 +174,7 @@ class Train:
                 self.biases (a numpy array): the trained biases
             Returns the trained biases of the neural network (if it has been trained).
         """
-        if isTrained:
+        if self.isTrained:
             return self.biases
         else:
             print ("Neural Network is not yet trained.")        
@@ -186,7 +186,7 @@ class Train:
                 filename (a str): the location to save the trained biases
             Save the trained biases to a specified location.
         """        
-        if isTrained:
+        if self.isTrained:
             np.save(filename, self.biases)
         else:
             print ("Neural Network is not yet trained.")            
@@ -198,7 +198,7 @@ class Train:
                 self.loss (a float): the final loss of the trained neural network
             Returns the final loss of the trained neural network.
         """
-        if isTrained:
+        if self.isTrained:
             return self.loss
         else:
             print ("Neural Network is not yet trained.")
@@ -210,7 +210,7 @@ class Train:
                 get_losses (a list): the loss for every training iterations
             Returns the losses for every training iteration.
         """
-        if isTrained:
+        if self.isTrained:
             return self.losses
         else:
             print("Neural network is not trained, or losses were not saved by input")
@@ -222,17 +222,17 @@ class Train:
                 filename (a str): the location to save the losses
             Saves the losses for every training iteration to a specified location.
         """
-        if isTrained:
+        if self.isTrained:
             np.save(filename, self.losses)
         else:
-            print("Neural network is not trained, or losses were not saved by input"
+           print("Neural network is not trained, or losses were not saved by input")
           
     # GRAPH_LOSSES                  
     def graph_losses (self, filename):
         N = len(self.losses)
         x = np.arange(0, N, 1)
         plt.plot (x, self.losses, 'go', linewidth=4.0)
-        plt.save(filename)
+        plt.savefig(filename)
                   
     # GET_DIMS
     def get_dims(self):
@@ -243,7 +243,7 @@ class Train:
                     number of neurons for each hidden layer, and the dimension of the output layer
             Returns the architecture of the neural network.
          """
-        return self.hidden_layers, [self.input_dim, self.hidden_neurons, self.output_dim]
+         return self.hidden_layers, [self.input_dim, self.hidden_neurons, self.output_dim]
                   
     # SAVE_DIMS
     def save_dims(self, filename):
@@ -386,12 +386,12 @@ class Restore:
         n = len(self.weights) - 1
                   
         # First hidden layer
-        # z = np.matmul(input_vector, self.weights[0]) + self.biases[0]
-        # a = self.relu(z)
+        z = np.matmul(input_vector, self.weights[0]) + self.biases[0]
+        a = self.relu(z)
         
         # Finds the output of the hidden layers of the neural network
-        a = input_vector
-        for i in range (0, N):
+        #a = input_vector
+        for i in range (1, N):
             z = np.matmul(a, self.weights[i]) + self.biases[i]
             a = self.relu(z)
         # The result of the output layer of the neural network
@@ -412,7 +412,7 @@ class Restore:
         return self.restore_NN(prediction_value)
                   
     # BATCH_PREDICT
-    def batch_predict(prediction_values, verbose=True):
+    def batch_predict(self, prediction_values, verbose=True):
         if verbose:
             for i in prediction_values:
                 predict = self.predict(i)
@@ -468,7 +468,7 @@ class Restore:
         mae_tot = []
         mse_tot = []
         # cycle through prediction_values
-        for i in range (0, len(prediction_values)):
+        for i in range (0, len(true_results)):
             # Get the value predicted by the neural network
             predict = self.predict(prediction_values[i])
             # Get the MAE and MSE errors betwwn the predicted and true resutls
@@ -493,10 +493,10 @@ class Restore:
            Finds the average MAE and MSE of the neural network results from true results from a given set
            of input values.
         """
-            mae, mse = self.compare_to_true (prediction_values, true_results)            
-            mae_avg = np.average(mae)
-            mse_avg = np.average(mse)
-            return mae_avg, mse_avg
+        mae, mse = self.compare_to_true (prediction_values, true_results)            
+        mae_avg = np.average(mae)
+        mse_avg = np.average(mse)
+        return mae_avg, mse_avg
     
     # GRAPH_MAE_AND_MSE              
     def  graph_mae_and_mse (self, prediction_values, true_results, filename):
@@ -513,12 +513,13 @@ class Restore:
         # Get the MAE and MSE errors
         mae, mse = self.compare_to_true (prediction_values, true_results)                  
         # Plot the MAE and MSE errors
+        prediction_values = prediction_values.flatten()
         plt.plot (prediction_values, mae, 'r^', label='MAE', linewidth=4.0)
         plt.plot (prediction_values, mse, 'bo', label='MSE', linewidth=4.0)
         # Add the legend
         plt.legend()
         # Save the graph
-        plt.save(filename)
+        plt.savefig(filename)
 
     # GRAPH_MAE              
     def  graph_mae (self, prediction_values, true_results, filename):
@@ -535,9 +536,10 @@ class Restore:
         # Get the MAE and MSE errors
         mae, mse = self.compare_to_true (prediction_values, true_results)                  
         # Plot the MAE error
+        prediction_values = prediction_values.flatten()
         plt.plot (prediction_values, mae, 'r^', label='MAE Error', linewidth=4.0)
         # Save the graph
-        plt.save(filename)
+        plt.savefig(filename)
           
     # GRAPH_MSE              
     def  graph_mse (self, prediction_values, true_results, filename):
@@ -554,14 +556,15 @@ class Restore:
         # Get the MAE and MSE errors
         mae, mse = self.compare_to_true (prediction_values, true_results)                  
         # Plot the MSE error
+        prediction_values = prediction_values.flatten()
         plt.plot (prediction_values, mse, 'bo', label='MSE Error', linewidth=4.0)
         # Save the graph
-        plt.save(filename)  
+        plt.savefig(filename)  
                   
     # ERROR_ANALYSIS
-    def error_analysis (prediction_values, true_results, save_prefix):
+    def error_analysis (self, prediction_values, true_values, save_prefix):
 
-        mae, mse = restore.average_mae_and_mse (prediction_values, true_values)
+        mae, mse = self.average_mae_and_mse (prediction_values, true_values)
         print ()
         print ("Average Mean Absolute Error: ", mae)
         print ("Average Mean Squared Error: ", mse)
@@ -572,13 +575,13 @@ class Restore:
         mse_filename = save_prefix + 'mse.png'
 
         print ("Making and Saving Graph of MAE and MSE")
-        restore.graph_mae_and_mse (prediction_values, true_values, mae_and_mse_filename)
+        self.graph_mae_and_mse (prediction_values, true_values, mae_and_mse_filename)
 
         print("Making and Saving Graph of MAE")
-        restore.graph_mae (prediction_values, true_values, mae_filename)
+        self.graph_mae (prediction_values, true_values, mae_filename)
 
         print("Making and Saving Graph of MSE")
-        restore.graph_mse (prediction_values, true_values, mse_filename)                      
+        self.graph_mse (prediction_values, true_values, mse_filename)                      
                   
 class TrainAndRestore (Train, Restore):
 # __INIT__
@@ -600,7 +603,7 @@ class TrainAndRestore (Train, Restore):
         self.batch_predict(prediction_values)
                   
     # TRAIN_AND_ERROR_ANALYSIS
-    def train_and_error_analysis (iterations, learning_rate save_names, prediction_values, true_values, save_prefix):
+    def train_and_error_analysis (iterations, learning_rate, save_names, prediction_values, true_values, save_prefix):
         print ("Training and Saving Weights and Biases")
         strain.train_and_save(iterations, learning_rate, save_names[0], save_names[1])
 
