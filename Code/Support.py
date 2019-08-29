@@ -20,6 +20,14 @@ import numpy as np
 from numpy.random import randint
 from math import floor
 
+def percent_zeros (lst):
+    N = len(lst)
+    n = 0
+    for i in lst:
+        if i == 0:
+            n = n +1
+    return (n/N)*100
+
 def generate_subset (input1_name, input2_name, percentage, output1_name, output2_name):
     input1 = np.load(input1_name)
     input2 = np.load(input2_name)
