@@ -479,7 +479,7 @@ class Restore:
         return mae_tot, mse_tot
                  
     # AVERAGE_MAE_AND_MSE              
-    def average_mae_and_mse (self, prediction_values, true_results):
+    def average_mae_and_mse (self, prediction_values, true_results, verbose=False):
         """
             Inputs:
                 prediction_values (a 2D list or numpy array): the values to generate outputs of the neural
@@ -496,7 +496,11 @@ class Restore:
         mae, mse = self.compare_to_true (prediction_values, true_results)            
         mae_avg = np.average(mae)
         mse_avg = np.average(mse)
-        return mae_avg, mse_avg
+        if verbose:
+            print ('Average MAE Error: ', mae_avg)
+            print ('Average MSE Error: ', mse_avg)
+        else:
+            return mae_avg, mse_avg
     
     # GRAPH_MAE_AND_MSE              
     def  graph_mae_and_mse (self, prediction_values, true_results, filename):
