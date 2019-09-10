@@ -1,8 +1,9 @@
 #################################################
 # Neural Network
 # Julie Hartley
-# Version 3.0.0
-# August 8, 2019
+# Version 3.5.0
+# Created: August 8, 2019
+# Modified: September 10, 2019
 #
 # Basic code for a neural network that allows the
 # trained weights and biases to be saved and 
@@ -12,71 +13,53 @@
 #################################################
 # OUTLINE
 # 
-# Trainer: Trains a neural network based on spefications given in the initialization.  Allows for
-# weights and biases of the trained neural network to be viewed and saved.
-#
+# Train: Trains a neural network based on spefications given in the initialization.  Allows for
+# weights and biases of the trained neural network to be viewed and saved, as well as providing 
+# analysis on training efficiency.
 #   __init__ (self, hidden_layers, hidden_neurons, learning_rate, input_dim, output_dim,
-#   input_file, training_file):  Initializes the neural network with given specifications
-#
-#   get_tensor_numeric (self, name): Gets the numeric value of a specific Tensorflow tensor, 
-#   specified by name.
-#
+#   input_file, training_file):  Initializes the neural network with given specifications.
+#   get_time (self): Returns the time needed to train the neural network (if it has been trained).
 #   get_weights(self): Returns the trained weights of the neural network (if it has been trained).
-#
-#   save_weights(self, filename): Save the trained weights to a specified location.
-#
+#   save_weights(self, filename): Saves the trained weights to the specified location (if it has been
+#   trainied).
 #   get_biases(self): Returns the trained biases of the neural network (if it has been trained).
-#
-#   save_biases(self, filename): Save the trained biases to a specified location.
-#
-#   get_loss(self): Returns the final loss of the trained neural network.
-#
-#   get_losses(self): Returns the losses for every training iteration.
-#
-#   save_losses(self, filename): Saves the losses for every training iteration to a specified location.
-#
-#   get_dims(self):  Returns the architecture of the neural network.
-#
-#   save_dims(self, filename): Saves the architecture of the neural network (number of hidden 
-#   layers, input dimension, number of hidden neurons, and output dimension).
-#
-#   train (self,iterations): Trains the neural network with specified number of training iterations, 
-#   save the weights, biases, and final loss.
-#
-#   train_and_save (self, iterations, weights_file, biases_file): Trains the neural network and then 
-#   saves the weights and biases.
+#   save_biases(self, filename): Saves the trained biases to the specified location (if it has been
+#   trained).
+#   get_training_loss(self): Returns the final training loss of the trained neural network.
+#   get_training_losses(self): Returns the training losses for every training iteration.
+#   save_training_losses(self, filename): Saves the training losses for every training iteration to 
+#   the specified location.
+#   get_validation_loss(self): Returns the final validation loss of the trained neural network.
+#   get_validation_losses(self): Returns the validation losses for every training iteration.
+#   save_validation_losses(self, filename): Saves the training validation for every training iteration to 
+#   the specified location.
+#   train (self,iterations, learning_rate, percent_validation, train): Trains the neural network with specified
+#   number of training iterations and learning rate, saves the weights, biases, and final losses to arrays.
+#   run (self, iterations, learning_rate, percent_validation, type. weights_file, biases_file): Trains the 
+#   neural network and then saves the weights and biases to file.
+#   generate_summary (self): generates a summary of the training including the neural network architecture and
+#   the final training and validation losses.
+#   help (self): prints documentaion to explain how the code runs.
 #
 # Restore: Restores a trained neural network and uses it to make predictions and perform error analysis 
 # on the neural network's results.
-#
 #   __init__ (self,weights_file, biases_file): Retrieves the trained weights and biases from file.
-#
-#   relu (self, x): Returns f(x) = max(0, x) (the rectified linear function).
-#
-#   restore_NN (self, input_vector): Uses trained weights and biases to predict the value of 
-#   the neural network at a given input.
-#
-#   predict (self, prediction_value): Uses the restored neural network to preduct the output value 
+#   predict (self, prediction_value): Restores the neural network and uses it to predict the output value 
 #   for the given input.
-#
-#   mse (self,A, B): Finds the MSE error between two lists/arrays.
-#
-#   mae (self,A, B): Finds the MAE error between two lists/arrays.
-#
 #   compare_to_true (self, prediction_values, true_results): Compares results of the neural network 
-#   to the true results using two metrics (MAE and MSE) at different input values.
-#
-#   average_mae_and_mse (self, prediction_values, true_results): Finds the average MAE and MSE errors of 
+#   to the true results using the provided error metric at different input values.
+#   get_average_error (self, prediction_values, true_results): Finds the average error of 
 #   the neural network results from true results from a given set of input values.
-#
-#   graph_mae_and_mse (self, prediction_values, true_results, filename): Produces a graph of 
-#   the MAE and MSE errors from compare_to_true.
-#
-#   graph_mae (self, prediction_values, true_results, filename): Produces a graph of the MAE error 
-#   from compare_to_true.
-#
-#   graph_mse (self, prediction_values, true_results, filename): Produces a graph of the MSE error 
-#   from compare_to_true.
+#   get_min_error (self, prediction_values, true_results): Finds the minimum error of 
+#   the neural network results from true results from a given set of input values.
+#   get_max_error (self, prediction_values, true_results): Finds the maximum error of 
+#   the neural network results from true results from a given set of input values.
+#   graph_error (self, prediction_values, true_results, filename): Produces a graph of 
+#   the errors from compare_to_true.
+#   generate_summary (self): Produces a summary of the results produced by the neural network including a
+#   error analysis
+#   help (self): prints documentaion to explain how the code runs.
+
 #################################################
 #############################
 # IMPORTS
@@ -89,17 +72,29 @@ import numpy as np
 from math import sqrt
 # for graphing
 import matplotlib.pyplot as plt
+# for timing
+from timeit import defaault_timer as timer
+
 # LOCAL IMPORTS 
 # The neural network for Trainer
 from NeuralNetworkSupport import neural_network as ua
+# The loss function for the neural network
+from NeuralNetworkSuport import mse as loss
+# The error metric (same as the loss function)
+error_metric = loss
+# The activation function for Restore
+from NeuralNetworkSupport import relu
+# To get the numeric values of the tensors
+from Support import get_tensor_numeric, generate_random_subset
 
 #############################
-# TRAINER
+# TRAIN
 #############################
 class Train:
     """
         Trains a neural network based on spefications given in the initialization.  Allows for
-        weights and biases of the trained neural network to be viewed and saved.
+        weights and biases of the trained neural network to be viewed and saved, as well as providing 
+        analysis on training efficiency..
     """
     # __INIT__
     def __init__ (self, hidden_layers, hidden_neurons, input_dim, output_dim,
@@ -107,9 +102,8 @@ class Train:
         """
             Inputs:
                 hidden_layers (an int): the number of hidden layers in the neural network
-                hidden_neurons (an int): the number of neurons per hidden layer
-                learning_rate (a float): the learning rate for the optimizer (typically less
-                    than one)
+                hidden_neurons (an int): the number of neurons per hidden layer (must be the same for
+                    each hidden layer)
                 input_dim (an int): the dimension of the input data
                 output_dim (an int): the dimension of the training data
                 input_file (a str): the location where the input data is saved (must be .npy extension)
@@ -125,23 +119,27 @@ class Train:
         # Initialize placeholders for the trained weights, biases, and final loss
         self.weights = []
         self.biases = []
-        self.loss = 'NaN'
+        self.training_loss = 'NaN'
+        self.validation_loss = 'NaN'
         # Changed to True after training
         self.isTrained = False
         # Holds losses for every training iteration is isSavedLosses=True
-        self.losses = []
+        self.training_losses = []
+        self.validation_losses = []
+        # Holds the training time
+        self.time = 'NaN'
     
-    # GET_TENSOR_NUMERIC
-    def get_tensor_numeric (self, name):
+    # GET_TIME
+    def get_time (self):
         """
-            Inputs:
-                name (a str): The name of the tensor
             Returns:
-                Unnamed: The numeric value of the tensor (either a single number
-                    or a numpy array
-            Gets the numeric value of a specific Tensorflow tensor, specified by name.
+                self.time (a float): the time needed to train the neural network
+            Returns the time needed to train the neural network (if it has been trained).
         """
-        return tf.get_default_graph().get_tensor_by_name(name).eval()
+        if self.isTrained:
+            return self.time
+        else:
+            print("Neural network is not yet trained.")
 
     # GET_WEIGHTS
     def get_weights(self):
@@ -160,7 +158,7 @@ class Train:
         """
             Inputs:
                 filename (a str): the location to save the trained weights
-            Save the trained weights to a specified location.
+            Saves the trained weights the a specified location (if it has been trained).
         """
         if self.isTrained:
             np.save(filename, self.weights)
@@ -184,80 +182,157 @@ class Train:
         """
             Inputs:
                 filename (a str): the location to save the trained biases
-            Save the trained biases to a specified location.
+            Saves the trained biases to a specified location (if it has been trained).
         """        
         if self.isTrained:
             np.save(filename, self.biases)
         else:
             print ("Neural Network is not yet trained.")            
 
-    # GET_LOSS
-    def get_loss(self):
+    # GET_TRAINING_LOSS
+    def get_training_loss(self):
         """
             Returns:
-                self.loss (a float): the final loss of the trained neural network
-            Returns the final loss of the trained neural network.
+                self.training_loss (a float): the final training loss of the trained neural network
+            Returns the final training loss of the trained neural network.
         """
         if self.isTrained:
-            return self.loss
+            return self.training_loss
         else:
             print ("Neural Network is not yet trained.")
             
-    # GET_LOSSES        
-    def get_losses(self):
+    # GET_VALIDATION_LOSS   
+    def get_validation_loss(self):
         """
             Returns:
-                get_losses (a list): the loss for every training iterations
-            Returns the losses for every training iteration.
+                self.validation_loss (a float): the final validation loss of the trained neural network
+            Returns the final validation loss of the trained neural network.
         """
         if self.isTrained:
-            return self.losses
+            return self.training_loss
         else:
-            print("Neural network is not trained, or losses were not saved by input")
+            print ("Neural Network is not yet trained.")
+            
+    # GET_TRAINING_LOSSES        
+    def get_training_losses(self):
+        """
+            Returns:
+                get_training_losses (a list): the training loss for every training iterations
+            Returns the training losses for every training iteration.
+        """
+        if self.isTrained:
+            return self.training_losses
+        else:
+            print("Neural network is not trained.")
+            
+    # GET_VALIDATION_LOSSES        
+    def get_validation_losses(self):
+        """
+            Returns:
+                get_validation_losses (a list): the validation loss for every training iterations
+            Returns the validationlosses for every training iteration.
+        """
+        if self.isTrained:
+            return self.validation_losses
+        else:
+            print("Neural network is not trained.")            
          
-    # SAVE_LOSSES    
-    def save_losses(self, filename):
+    # SAVE_TRAINING_LOSSES    
+    def save_training_losses(self, filename):
         """
             Input:
-                filename (a str): the location to save the losses
-            Saves the losses for every training iteration to a specified location.
+                filename (a str): the location to save the training losses
+            Saves the training losses for every training iteration to a specified location.
         """
         if self.isTrained:
-            np.save(filename, self.losses)
+            np.save(filename, self.training_losses)
         else:
-           print("Neural network is not trained, or losses were not saved by input")
-          
-    # GRAPH_LOSSES                  
-    def graph_losses (self, filename):
-        N = len(self.losses)
-        x = np.arange(0, N, 1)
-        plt.plot (x, self.losses, 'go', linewidth=4.0)
-        plt.savefig(filename)
-                  
-    # GET_DIMS
-    def get_dims(self):
-         """
-            Returns:
-                self.hidden_layers (an int): the number of hidden layers in the neural network
-                Unnamed (a list): contains three elements: the dimension of the input layer, the 
-                    number of neurons for each hidden layer, and the dimension of the output layer
-            Returns the architecture of the neural network.
-         """
-         return self.hidden_layers, [self.input_dim, self.hidden_neurons, self.output_dim]
-                  
-    # SAVE_DIMS
-    def save_dims(self, filename):
+           print("Neural network is not trained.
+                 
+    # SAVE_VALIDATION_LOSSES
+    def save_validation_losses(self, filename):
         """
             Input:
-                filename (a str): the location to save the architecture of the neural network
-            Saves the architecture of the neural network (number of hidden layers, input dimension, 
-            number of hidden neurons, and output dimension).
+                filename (a str): the location to save the valdiation losses
+            Saves the validation losses for every training iteration to a specified location.
         """
-        lst = [self.hidden_layers, [self.input_dim, self.hidden_neurons, self.output_dim]]
-        np.save (filename, lst)
+        if self.isTrained:
+            np.save(filename, self.validation_losses)
+        else:
+           print("Neural network is not trained.                 
+          
+    # GRAPH_TRAINING_LOSSES                  
+    def graph_training_losses (self, filename):
+        """
+            Input:
+                filename (a str): the location to save the graph of training losses
+            Creates a graph of training loss vs. iteration
+        """
+        # The number of iterations
+        N = len(self.training_losses)
+        x = np.arange(0, N, 1)
+        
+        plt.plot (x, self.training_losses, 'go', linewidth=4.0, label='Training Loss')
+        plt.legend()
+        plt.xlabel('Iterations')
+        plt.ylable('Training Loss')
+        plt.savefig(filename)
+                 
+    # GRAPH_VALIDATION_LOSSES                  
+    def graph_validation_losses (self, filename):
+        """
+            Input:
+                filename (a str): the location to save the graph of validation losses
+            Creates a graph of validation loss vs. iteration
+        """
+        # The number of iterations
+        N = len(self.validation_losses)
+        x = np.arange(0, N, 1)
+        
+        plt.plot (x, self.validation_losses, 'co', linewidth=4.0, label='Validation Loss')
+        plt.legend()
+        plt.xlabel('Iterations')
+        plt.ylable('Validation Loss')
+        plt.savefig(filename)       
+                 
+    # GRAPH_VALIDATION_LOSSES                  
+    def graph_validation_losses (self, filename):
+        """
+            Input:
+                filename (a str): the location to save the graph of validation losses
+            Creates a graph of validation loss vs. iteration
+        """
+        # The number of iterations
+        N = len(self.validation_losses)
+        x = np.arange(0, N, 1)
+        
+        plt.plot (x, self.validation_losses, 'co', linewidth=4.0, label='Validation Loss')
+        plt.legend()
+        plt.xlabel('Iterations')
+        plt.ylable('Validation Loss')
+        plt.savefig(filename)                 
+                  
+    # GRAPH_TRAINING_AND_VALIDATION_LOSSES                  
+    def graph_training_and)validation_losses (self, filename):
+        """
+            Input:
+                filename (a str): the location to save the graph of training and 
+                    validation losses
+            Creates a graph of taining and validation loss vs. iteration
+        """
+        # The number of iterations
+        N = len(self.validation_losses)
+        x = np.arange(0, N, 1)
+        
+        plt.plot (x, self.training_losses, 'go', linewidth=4.0, label='Training Loss')                 
+        plt.plot (x, self.validation_losses, 'co', linewidth=4.0, label='Validation Loss')
+        plt.legend()
+        plt.xlabel('Iterations')
+        plt.ylable('Loss')
+        plt.savefig(filename)                 
 
     # TRAIN
-    def train (self,iterations, learning_rate):
+    def train (self,iterations, learning_rate, percent_validation, loop_type):
         """"
             Input:
                 iterations (an int): the number of training iterations
